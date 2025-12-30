@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../config/supabase';
 import { UserRole } from '../types/database';
@@ -60,14 +60,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
   };
-
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  };
-
-  const signUp = async (email: string, password: string, name: string) => {
-    const { error: authError, data } = await supabase.auth.signUp({ 
+    try {
+      // Check if there's an active session before attempting to sign out
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+      } else {
+        // If no session, just clear the local state
+        console.log('No active session found, clearing local state');
+        setUser(null);
+        setUserRole('guest');
+      }
+    } catch (error) {
+      console.error('Error during sign out:', error);
+      // Even if signOut fails, clear local state
+      setUser(null);
+      setUserRole('guest');
+      // Don't re-throw the error to prevent UI breaking
+    }
+  };const signUp = async (email: string, password: string, name: string) => {
+    const { error: authError } = await supabase.auth.signUp({ 
       email, 
       password,
       options: {
@@ -75,19 +90,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
     if (authError) throw authError;
-
-    if (data.user) {
-      const { error: dbError } = await supabase
-        .from('users')
-        .insert({
-          id: data.user.id,
-          email,
-          name,
-          role: 'user'
-        });
-      
-      if (dbError) throw dbError;
-    }
+    
+    // Note: User profile is automatically created by database trigger
+    // No manual database insert needed
   };
 
   return (

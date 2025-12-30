@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/src/hooks/useAuth';
@@ -11,19 +11,9 @@ export default function AdminBookingsPage() {
   const router = useRouter();
   const { userRole } = useAuth();
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<BookingStatus | 'all'>('all');
+  const [isLoading, setIsLoading] = useState(true);  const [statusFilter, setStatusFilter] = useState<BookingStatus | 'all'>('all');
 
-  useEffect(() => {
-    if (userRole !== 'admin') {
-      router.push('/dashboard');
-      return;
-    }
-
-    loadBookings();
-  }, [userRole, router, statusFilter]);
-
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     try {
       const data = await bookingService.getAllBookings(
         statusFilter === 'all' ? undefined : statusFilter
@@ -34,7 +24,16 @@ export default function AdminBookingsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    if (userRole !== 'admin') {
+      router.push('/dashboard');
+      return;
+    }
+
+    loadBookings();
+  }, [userRole, router, loadBookings]);
 
   const handleStatusUpdate = async (bookingId: string, newStatus: BookingStatus) => {
     try {

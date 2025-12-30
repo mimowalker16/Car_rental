@@ -53,15 +53,19 @@ class VehicleService {
     console.log('Fetched vehicle:', data);
     return data;
   }
-
   async createVehicle(vehicleData: Omit<Vehicle, 'id' | 'created_at' | 'updated_at'>) {
+    console.log('Creating vehicle with data:', vehicleData);
     const { data, error } = await supabase
       .from('vehicles')
       .insert(vehicleData)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Database error creating vehicle:', error);
+      throw error;
+    }
+    console.log('Successfully created vehicle:', data);
     return data;
   }
 

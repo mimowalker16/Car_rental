@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { bookingService } from '@/src/services/booking.service';
-import { useAuth } from '@/src/hooks/useAuth';
 
 interface BookingDetails {
   id: string;
@@ -24,27 +23,34 @@ interface BookingDetails {
   };
 }
 
-export default function BookingDetailsPage({ params }: { params: { id: string } }) {
+export default function BookingDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const { user } = useAuth();
-  const [booking, setBooking] = useState<BookingDetails | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [booking, setBooking] = useState<BookingDetails | null>(null);const [isLoading, setIsLoading] = useState(true);
+  const [bookingId, setBookingId] = useState<string>('');
   const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
-    async function loadBooking() {
-      try {
-        const data = await bookingService.getBookingById(params.id);
-        setBooking(data);
-      } catch (error) {
-        console.error('Error loading booking:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
+    // Resolve params Promise and get the booking ID
+    params.then(({ id }) => {
+      setBookingId(id);
+    });  }, [params]);
 
-    loadBooking();
-  }, [params.id]);
+  const loadBooking = useCallback(async () => {
+    try {
+      const data = await bookingService.getBookingById(bookingId);
+      setBooking(data);
+    } catch (error) {
+      console.error('Error loading booking:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [bookingId]);
+
+  useEffect(() => {
+    if (bookingId) {
+      loadBooking();
+    }
+  }, [bookingId, loadBooking]);
 
   const handleCancelBooking = async () => {
     if (!booking || !window.confirm('Are you sure you want to cancel this booking?')) {
@@ -75,7 +81,7 @@ export default function BookingDetailsPage({ params }: { params: { id: string } 
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-gray-900">Booking not found</h2>
-        <p className="mt-2 text-gray-600">The booking you're looking for doesn't exist.</p>
+        <p className="mt-2 text-gray-600">The booking you&apos;re looking for doesn&apos;t exist.</p>
       </div>
     );
   }

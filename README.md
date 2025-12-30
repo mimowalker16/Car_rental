@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Techno Cars 🚗
+
+A modern car rental platform built for the Algerian market, featuring vehicle management, booking system, and user authentication.
+
+## Features
+
+- 🚗 **Vehicle Management** - Browse, filter, and manage rental vehicles
+- 📅 **Booking System** - Complete booking workflow with status tracking
+- 👤 **User Authentication** - Secure login/registration with Supabase Auth
+- 👨‍💼 **Admin Dashboard** - Manage vehicles, bookings, and users
+- 📄 **Document Management** - Upload and manage rental documents
+- 🇩🇿 **Algeria-Specific** - Wilaya selection, local phone formats, DZD currency
+
+## Tech Stack
+
+- **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
+- **Language:** TypeScript
+- **Styling:** [Tailwind CSS 4](https://tailwindcss.com/)
+- **Database & Auth:** [Supabase](https://supabase.com/)
+- **Deployment:** Vercel (recommended)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18+ 
+- npm, yarn, pnpm, or bun
+- Supabase account
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Install dependencies
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Run development server
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-To learn more about Next.js, take a look at the following resources:
+### Database Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Create a new Supabase project
+2. Run the database migration scripts (contact admin for SQL files)
+3. Configure Row Level Security (RLS) policies
+4. Set up storage buckets for vehicle images and documents
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+techno-cars/
+├── app/                    # Next.js App Router pages
+│   ├── dashboard/          # Protected dashboard routes
+│   │   ├── admin/          # Admin-only pages
+│   │   ├── bookings/       # User bookings
+│   │   ├── documents/      # Document management
+│   │   └── profile/        # User profile
+│   ├── vehicles/           # Public vehicle pages
+│   ├── login/              # Authentication
+│   └── register/
+├── src/
+│   ├── components/         # React components
+│   │   ├── common/         # Reusable UI components
+│   │   ├── features/       # Feature-specific components
+│   │   └── layout/         # Layout components
+│   ├── contexts/           # React contexts (Auth)
+│   ├── services/           # API service functions
+│   ├── types/              # TypeScript type definitions
+│   └── utils/              # Utility functions
+└── public/                 # Static assets
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev      # Start development server
+npm run build    # Build for production
+npm run start    # Start production server
+npm run lint     # Run ESLint
+```
+
+## Contributing
+
+1. Create a feature branch from `main`
+2. Make your changes
+3. Submit a pull request
+
+## License
+
+Private - All rights reserved

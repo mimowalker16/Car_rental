@@ -25,6 +25,11 @@ export interface Vehicle {
   fuel_policy: string;
   availability: boolean;
   image_urls: string[];
+  color?: string;
+  transmission?: string;
+  fuel_type?: string;
+  seats?: number;
+  features?: string[];
   created_at: string;
   updated_at: string;
 }

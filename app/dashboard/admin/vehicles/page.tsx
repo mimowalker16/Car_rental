@@ -10,7 +10,7 @@ import { VehicleFormModal } from '@/src/components/features/vehicles/VehicleForm
 
 export default function AdminVehiclesPage() {
   const router = useRouter();
-  const { userRole } = useAuth();
+  const { user, userRole } = useAuth();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -62,11 +62,9 @@ export default function AdminVehiclesPage() {
     } catch (error) {
       console.error('Error deleting vehicle:', error);
     }
-  };
-
-  if (isLoading) {
+  };  if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
+      <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -74,41 +72,47 @@ export default function AdminVehiclesPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Manage Vehicles</h1>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-        >
-          Add New Vehicle
-        </button>
-      </div>
+      <div className="max-w-7xl mx-auto">        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent">
+              Manage Vehicles
+            </h1>
+            <p className="text-white/80 mt-2">
+              Current user: <span className="font-semibold text-white">{user?.email}</span> | 
+              Role: <span className="font-semibold text-white">{userRole}</span>
+            </p>
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-6 py-3 bg-gradient-to-r from-blue-500/80 to-purple-500/80 hover:from-blue-600/90 hover:to-purple-600/90 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 backdrop-blur border border-blue-400/30 shadow-lg"
+          >
+            ➕ Add New Vehicle
+          </button>
+        </div>
 
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl overflow-hidden">
+        <div className="overflow-x-auto">          <table className="min-w-full divide-y divide-white/20">
+            <thead className="bg-white/5">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Vehicle
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Details
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Price
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {vehicles.map((vehicle) => (
-                <tr key={vehicle.id}>
+            <tbody className="bg-transparent divide-y divide-white/10">{vehicles.map((vehicle) => (
+                <tr key={vehicle.id} className="hover:bg-white/5 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="relative h-10 w-10 flex-shrink-0">
@@ -178,9 +182,12 @@ export default function AdminVehiclesPage() {
           onClose={() => {
             setShowAddModal(false);
             setEditingVehicle(undefined);
-          }}
-          onSave={async (vehicleData) => {
+          }}          onSave={async (vehicleData) => {
             try {
+              console.log('Admin vehicles page - Current user:', user);
+              console.log('Admin vehicles page - User role:', userRole);
+              console.log('Admin vehicles page - Vehicle data to save:', vehicleData);
+              
               if (editingVehicle) {
                 await vehicleService.updateVehicle(editingVehicle.id, vehicleData);
               } else {
@@ -200,13 +207,14 @@ export default function AdminVehiclesPage() {
               }
               loadVehicles();
               setShowAddModal(false);
-              setEditingVehicle(undefined);
-            } catch (error) {
+              setEditingVehicle(undefined);            } catch (error) {
               console.error('Error saving vehicle:', error);
+              // You might want to show a toast notification here
+              alert('Failed to save vehicle. Please check console for details.');
             }
           }}
-        />
-      )}
+        />      )}
+      </div>
     </div>
   );
 }

@@ -39,3 +39,28 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ===== PROJECT SPECIFIC =====
+
+# SQL scripts (contain sensitive setup data)
+*.sql
+
+# Debug and test files
+debug-*.js
+test-*.js
+app/debug/
+app/debug-auth/
+app/test-algeria/
+
+# Temporary/backup files
+*-old.tsx
+*-new.tsx
+app/layout-new.tsx
+app/dashboard/page-old.tsx
+app/dashboard/page-new.tsx
+
+# Internal documentation (setup guides with sensitive info)
+*-SETUP-GUIDE.md
+*_SUMMARY.md
+SETUP-*.md
+*-IMPLEMENTATION*.md

@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/hooks/useAuth';
 import { supabase } from '@/src/config/supabase';
 import { bookingService } from '@/src/services/booking.service';
 import { UserRole, BookingStatus } from '@/src/types/database';
+import { AlgerianPhoneInput } from '@/src/components/common/AlgerianPhoneInput';
 import Image from 'next/image';
 
 interface UserDetails {
@@ -32,36 +33,35 @@ interface UserBooking {
   };
 }
 
-export default function UserDetailsPage({ params }: { params: { id: string } }) {
+export default function UserDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { userRole } = useAuth();
   const [user, setUser] = useState<UserDetails | null>(null);
   const [bookings, setBookings] = useState<UserBooking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [userId, setUserId] = useState<string>('');
   const [editForm, setEditForm] = useState({
     name: '',
     phone: '',
     address: '',
     role: '' as UserRole
-  });
+  });  useEffect(() => {
+    // Resolve params Promise and get the user ID
+    params.then(({ id }) => {
+      setUserId(id);
+    });
+  }, [params]);
 
-  useEffect(() => {
-    if (userRole !== 'admin') {
-      router.push('/dashboard');
-      return;
-    }
-
-    loadUserData();
-  }, [userRole, router, params.id]);
-
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
+    if (!userId) return;
+    
     try {
       // Load user details
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', userId)
         .single();
 
       if (userError) throw userError;
@@ -75,14 +75,23 @@ export default function UserDetailsPage({ params }: { params: { id: string } }) 
       });
 
       // Load user's bookings
-      const bookingsData = await bookingService.getUserBookings(params.id);
+      const bookingsData = await bookingService.getUserBookings(userId);
       setBookings(bookingsData);
     } catch (error) {
       console.error('Error loading user data:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (userRole !== 'admin') {
+      router.push('/dashboard');
+      return;
+    }    if (userId) {
+      loadUserData();
+    }
+  }, [userRole, router, userId, loadUserData]);
 
   const handleUpdateUser = async () => {
     try {
@@ -94,7 +103,7 @@ export default function UserDetailsPage({ params }: { params: { id: string } }) 
           address: editForm.address,
           role: editForm.role
         })
-        .eq('id', params.id);
+        .eq('id', userId);
 
       if (error) throw error;
 
@@ -134,7 +143,7 @@ export default function UserDetailsPage({ params }: { params: { id: string } }) 
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-gray-900">User not found</h2>
-        <p className="mt-2 text-gray-600">The user you're looking for doesn't exist.</p>
+        <p className="mt-2 text-gray-600">The user you&apos;re looking for doesn&apos;t exist.</p>
       </div>
     );
   }
@@ -169,15 +178,10 @@ export default function UserDetailsPage({ params }: { params: { id: string } }) 
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Phone</label>
-                <input
-                  type="text"
+              </div>              <div>
+                <AlgerianPhoneInput
                   value={editForm.phone}
-                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  onChange={(phone) => setEditForm({ ...editForm, phone })}
                 />
               </div>
 
